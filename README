@@ -2,7 +2,7 @@ This is a small C project about manipulating 3D chunks (width × height × depth
 
 This repository contains implementations for placing/filling blocks, flood fill in 2D/3D, creating shells around blocks, and rotating the chunk around the Y axis. Some features (compression/encoding and gravity) are declared but not fully implemented yet.
 
-## Block IDs
+1) Block IDs
 
 Defined in `libchunk/chunk.h`:
 - `BLOCK_AIR = 0`
@@ -10,14 +10,14 @@ Defined in `libchunk/chunk.h`:
 - `BLOCK_WOOD = 2`
 - `BLOCK_STONE = 3`
 
-## Coordinate system and memory model
+2) Coordinate system and memory model
 
 - Indexing order is `chunk[x][y][z]`.
 - Dimensions: `width` (X), `height` (Y), `depth` (Z).
 - Most functions mutate the provided chunk in-place and return the same pointer.
 - Important: `chunk_rotate_y` allocates a new 3D array with dimensions `depth × height × width`, copies rotated data, and frees the original chunk. Always use the returned pointer after rotation.
 
-## API overview
+3) API overview
 
 Declared in `chunk.h` and implemented as noted below.
 
@@ -34,7 +34,7 @@ Declared in `chunk.h` and implemented as noted below.
 - Transform (implemented in `chunk_transform.c`):
   - `chunk_rotate_y(chunk, width, height, depth)` – rotate 90° around the Y axis; returns a newly allocated chunk and frees the original.
 
-## Build
+4) Build
 
 Prerequisites: `gcc`, `make` (Linux/macOS). The Makefile uses `-std=c11 -Wall -Wextra -g` and links `-lm`.
 
@@ -47,7 +47,7 @@ Notes:
 - The Makefile references `src/main.c` (test program) and `libchunk/chunk_compress.c`. These files are not present in this repository snapshot. If you only need the library, run `make libchunk`.
 - To build `build/main`, add your own `src/main.c` or remove that target.
 
-## TODO
+5) TODO
 
 - Gravity: `chunk_apply_gravity` is not implemented.
 - Compression: `chunk_encode`/`chunk_decode` are declared but missing (`libchunk/chunk_compress.c`).
