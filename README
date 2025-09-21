@@ -1,0 +1,53 @@
+This is a small C project about manipulating 3D chunks (width × height × depth) stored as a `char***` matrix.
+
+This repository contains implementations for placing/filling blocks, flood fill in 2D/3D, creating shells around blocks, and rotating the chunk around the Y axis. Some features (compression/encoding and gravity) are declared but not fully implemented yet.
+
+## Block IDs
+
+Defined in `libchunk/chunk.h`:
+- `BLOCK_AIR = 0`
+- `BLOCK_GRASS = 1`
+- `BLOCK_WOOD = 2`
+- `BLOCK_STONE = 3`
+
+## Coordinate system and memory model
+
+- Indexing order is `chunk[x][y][z]`.
+- Dimensions: `width` (X), `height` (Y), `depth` (Z).
+- Most functions mutate the provided chunk in-place and return the same pointer.
+- Important: `chunk_rotate_y` allocates a new 3D array with dimensions `depth × height × width`, copies rotated data, and frees the original chunk. Always use the returned pointer after rotation.
+
+## API overview
+
+Declared in `chunk.h` and implemented as noted below.
+
+- Generation (implemented in `chunk_gen.c`):
+  - `chunk_place_block(chunk, width, height, depth, x, y, z, block)` – set a single block if coordinates are inside bounds.
+  - `chunk_fill_cuboid(chunk, width, height, depth, x0, y0, z0, x1, y1, z1, block)` – inclusive fill of a rectangular region.
+  - `chunk_fill_sphere(chunk, width, height, depth, x, y, z, radius, block)` – fill all cells within a radius around a center.
+
+- Processing (implemented in `chunk_process.c`):
+  - `chunk_shell(chunk, width, height, depth, target_block, shell_block)` – surround each `target_block` with a shell using a neighborhood approximated by a sphere of radius 1.5. Internally avoids replacing the target itself and then commits all shell placements.
+  - `chunk_fill_xz(chunk, width, height, depth, x, y, z, block)` – flood fills the connected component in the XZ plane at fixed Y.
+  - `chunk_fill(chunk, width, height, depth, x, y, z, block)` – 3D flood fill of the connected component starting at `(x,y,z)`.
+
+- Transform (implemented in `chunk_transform.c`):
+  - `chunk_rotate_y(chunk, width, height, depth)` – rotate 90° around the Y axis; returns a newly allocated chunk and frees the original.
+
+## Build
+
+Prerequisites: `gcc`, `make` (Linux/macOS). The Makefile uses `-std=c11 -Wall -Wextra -g` and links `-lm`.
+
+Typical targets:
+- `make libchunk` – build the static library at `build/libchunk.a`.
+- `make` or `make all` – build `build/main` linking against `libchunk.a`.
+- `make clean` – remove build artifacts.
+
+Notes:
+- The Makefile references `src/main.c` (test program) and `libchunk/chunk_compress.c`. These files are not present in this repository snapshot. If you only need the library, run `make libchunk`.
+- To build `build/main`, add your own `src/main.c` or remove that target.
+
+## TODO
+
+- Gravity: `chunk_apply_gravity` is not implemented.
+- Compression: `chunk_encode`/`chunk_decode` are declared but missing (`libchunk/chunk_compress.c`).
